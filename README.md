@@ -4,11 +4,11 @@ This repository provides a reference implementation of RNNs for Trajectory predi
 https://www.cs.purdue.edu/homes/moore269/docs/rnntrajectory.pdf
 
 #### Prerequisites
-Blocks 0.1.1
-Theano
-Numpy
+Blocks 0.1.1 <br>
+Theano <br>
+Numpy <br>
 
-You can use
+You can use <br>
 pip install git+git://github.com/mila-udem/blocks.git@v0.1.1 \
   -r https://raw.githubusercontent.com/mila-udem/blocks/stable/requirements.txt
 
