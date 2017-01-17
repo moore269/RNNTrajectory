@@ -16,24 +16,26 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
+import os
+import time
+import argparse
 
 import numpy as np
 import theano
-#from blocks.serialization import load
-from blocks.bricks import NDimensionalSoftmax
-from readData import getTesting
-import os
-from readData import *
-from config import config
-from utils import get_metadata, get_stream,get_stream_inGPU_test, track_best, MainLoop, switchStream
-from model import RR_cost
 from theano import shared
-import time
 
+from blocks.bricks import NDimensionalSoftmax
 from blocks.extensions.saveload import Load
+
+from Utilities.readData import *
+from Utilities.utils import get_metadata, get_stream,get_stream_inGPU_test, track_best, MainLoop, switchStream
+from ModelDefinitions.model import RR_cost
+
+from config import config
 # Load config parameters
 locals().update(config)
 
+# Perform evaluations based on Mean Reciprocal Rank
 def evaluateREC(data_file, fRR, model, sharedSUMVARs, localShared, sharedName='sharedData', gpuData=True):
     # by default let's set batch size to 1 for ease of programming
     streamList = get_stream_inGPU_test(data_file, sharedName, model)
@@ -65,6 +67,7 @@ def evaluateREC(data_file, fRR, model, sharedSUMVARs, localShared, sharedName='s
     print("RecRank: "+str(recRank/totalPreds))
     return recRank/totalPreds
 
+# Load appropriate model file
 def evaluation(model_file_path, data_name='', modData="m3", gpuData=True, mTest=False):
     trainInd1=model_file_path.find("_train_size_")+len("_train_size_")
     trainInd2=model_file_path.find("_", trainInd1)
@@ -92,7 +95,6 @@ def evaluation(model_file_path, data_name='', modData="m3", gpuData=True, mTest=
     print 'Loading model from {0}...'.format(model_file_path)
     main_loop = Load(model_file_path)
     #get validation cost
-    #main_loop.log[len(main_loop.log)-1]['dev_cost'].tolist()
     print 'Model loaded. Building prediction function...'
     model = main_loop.model
     if gpuData:
@@ -127,6 +129,7 @@ def evaluation(model_file_path, data_name='', modData="m3", gpuData=True, mTest=
 
     return (evaluateREC(data_train, fRR, model, sharedSUMVARs, localShared), evaluateREC(data_valid, fRR, model, sharedSUMVARs, localShared), evaluateREC(data_test, fRR, model, sharedSUMVARs, localShared))
 
+# pick the best model according to validation measure
 def pickBestModel(trial, models_folder, transitions, rnnType='lstm', data_name=''):
     mFiles = os.listdir(models_folder)
     print("in "+models_folder)
@@ -150,21 +153,26 @@ def pickBestModel(trial, models_folder, transitions, rnnType='lstm', data_name='
     print(best_model_file)
     return best_model_file
 
+def parse_args():
+    '''
+    Parses arguments.
+    '''
+    parser = argparse.ArgumentParser(description="Run training for RNN Trajectory Project")
 
+    parser.add_argument('--hidden-size', nargs='?', type=int, default=10,
+                        help='Hidden size for RNN. Default is 10.')
+
+    parser.add_argument('--data-name', default="yoo-choose",
+                        help='Data file prefix. Default is yoo-choose.')
+  
+
+    return parser.parse_args()
+
+# change model_file_path according to needs
 if __name__ == '__main__':
-    data_name = sys.argv[1]
+    args = parse_args()
+    modelFolder="models/"+args.data_name+"/"
+    evaluation(modelFolder+"rnn_type_LSTM_trial_11_hiddenSize_10_numLayers_1_dropout_0.0_train_size_0.8_transitions_10000_novalid_False_tgrad_1_boost_F_best.pkl", data_name=args.data_name)
 
-    hiddenSize = sys.argv[2]
-    scratch=os.environ.get('RCAC_SCRATCH')
-    if not scratch ==None:
-        modelFolder=scratch+"/lstm2models/"+data_name+"/"
-    else:
-        modelFolder="models/"+data_name+"/"
-
-    evaluation(modelFolder+"rnn_type_LSTM_m3_trial_11_hiddenSize_10_numLayers_1_dropout_0.0_train_size_0.8_transitions_10000_novalid_False_tgrad_1_boost_F_best.pkl", data_name=data_name)
-    #evaluation(modelFolder+"rnn_type_rnn_trial_11_hiddenSize_100_numLayers_1_dropout_0.0_train_size_0.8_transitions_10000_novalid_False_last.pkl", data_name=data_name)
-    #evaluation(modelFolder+"rnn_type_rnn_m1_trial_11_hiddenSize_"+hiddenSize+"_numLayers_1_dropout_0.0_train_size_0.8_transitions_"+maxTrans+"_novalid_False_best.pkl", data_name=data_name)
-    #bestM=pickBestModel(11, modelFolder, transitions=transitions, rnnType='rnn', data_name=data_name)
-    #evaluation(modelFolder+bestM, data_name=data_name)
 
 

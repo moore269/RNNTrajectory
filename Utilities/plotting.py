@@ -20,14 +20,14 @@ import numpy as np
 import theano
 from blocks.serialization import load
 from blocks.bricks import NDimensionalSoftmax
-from utils import get_metadata, get_stream
+from Utilities.utils import get_metadata, get_stream
 from config import config
 import argparse
 import sys
-from readData import getTesting
+from Utilities.readData import getTesting
 import os
 from pylab import plot, legend, xlabel, ylabel, title, savefig, loglog
-from readData import *
+from Utilities.readData import *
 from predict import *
 
 # Load config parameters

@@ -23,7 +23,7 @@ import h5py
 import yaml
 from fuel.datasets import H5PYDataset
 from config import config
-from readData import *
+from Utilities.readData import *
 from random import shuffle
 import sys
 import cPickle as pickle

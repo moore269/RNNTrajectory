@@ -34,11 +34,11 @@ import numpy as np
 import cPickle as pickle
 from theano import tensor
 from theano import function
-from model import nn_fprop
-from IntStream import *
+from ModelDefinitions.model import nn_fprop
+from BlocksModules.IntStream import *
 from theano import shared
-from myCheckpoint import myCheckpoint
-from FinishIfNoImprovementEpsilonAfter import *
+from BlocksModules.myCheckpoint import myCheckpoint
+from BlocksModules.FinishIfNoImprovementEpsilonAfter import *
 from config import config
 
 locals().update(config)
